@@ -29,7 +29,7 @@ Fire = Entity.extend({
             images: [gGameEngine.fireImg],
             frames: { width: this.size.w, height: this.size.h, regX: 0, regY: 0 },
             animations: {
-                idle: [0, 5, null, 0.4],
+                idle: [0, 5, null, 0.4]
             }
         });
         this.bmp = new createjs.Sprite(spriteSheet);
@@ -41,7 +41,6 @@ Fire = Entity.extend({
 
         this.position = position;
 
-        var pixels = Utils.convertToBitmapPosition(position);
         this.bmp.x = position.x + 2;
         this.bmp.y = position.y - 5;
 
@@ -53,5 +52,11 @@ Fire = Entity.extend({
 
     remove: function() {
         gGameEngine.stage.removeChild(this.bmp);
+        for (var i = 0; i < gGameEngine.fires.length; i++) {
+            var fire = gGameEngine.fires[i];
+            if (this == fire) {
+                gGameEngine.fires.splice(i, 1);
+            }
+        }
     }
 });

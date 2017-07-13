@@ -35,8 +35,6 @@ Bomb = Entity.extend({
 
     exploded: false,
 
-    fires: [],
-
     explodeListener: null,
 
     init: function(id, position, strength) {
@@ -68,5 +66,11 @@ Bomb = Entity.extend({
 
     remove: function() {
         gGameEngine.stage.removeChild(this.bmp);
+        for (var i = 0; i < gGameEngine.bombs.length; i++) {
+            var bomb = gGameEngine.bombs[i];
+            if (this == bomb) {
+                gGameEngine.bombs.splice(i, 1);
+            }
+        }
     }
 });

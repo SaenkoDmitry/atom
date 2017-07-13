@@ -2,7 +2,7 @@ package ru.atom.bombergirl.mmserver;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ru.atom.bombergirl.gameserver.EventServer;
+import ru.atom.bombergirl.game.server.EventServer;
 
 import java.util.ArrayList;
 import java.util.List;

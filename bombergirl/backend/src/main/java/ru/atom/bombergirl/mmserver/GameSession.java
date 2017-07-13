@@ -2,12 +2,12 @@ package ru.atom.bombergirl.mmserver;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ru.atom.bombergirl.gamemodel.geometry.Point;
-import ru.atom.bombergirl.gamemodel.model.*;
-import ru.atom.bombergirl.message.ObjectMessage;
-import ru.atom.bombergirl.message.Topic;
-import ru.atom.bombergirl.network.Broker;
-import ru.atom.bombergirl.util.JsonHelper;
+import ru.atom.bombergirl.game.model.geometry.Point;
+import ru.atom.bombergirl.game.model.model.*;
+import ru.atom.bombergirl.communication.message.ObjectMessage;
+import ru.atom.bombergirl.communication.message.Topic;
+import ru.atom.bombergirl.communication.network.Broker;
+import ru.atom.bombergirl.communication.util.JsonHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;

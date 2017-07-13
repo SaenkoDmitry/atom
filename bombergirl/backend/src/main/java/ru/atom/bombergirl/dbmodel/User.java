@@ -16,7 +16,9 @@ import java.util.Date;
 @Table(name = "user", schema = "game")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    //@GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+
     private Integer id;
 
     @Column(name = "login", unique = true, nullable = false, length = 20)
