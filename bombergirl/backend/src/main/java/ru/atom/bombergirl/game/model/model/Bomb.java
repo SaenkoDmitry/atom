@@ -20,6 +20,7 @@ public class Bomb implements GameObject, Positionable, Temporary, Tickable, Coll
     private long workTime = 0;
     private boolean isDead = false;
     private final int id;
+    private int length = 1;
     private GameSession session;
     private int pawnId;
 
@@ -76,16 +77,48 @@ public class Bomb implements GameObject, Positionable, Temporary, Tickable, Coll
     public void destroy() {
         List<GameObject> gameObjects = session.getGameObjects();
         List<Point> toBurn = new ArrayList<>(Arrays.asList(position));
+        int x = position.getX();
+        int y = position.getY();
+        //session.addGameObject(new Fire(position.getX(), position.getY(), session));
+//        for (int i = 1; i <= length; i++) {
+            Fire[] fire = new Fire[4];
+            fire[0] = new Fire(x + GameField.GRID_SIZE, y, session);// * i
+            fire[1] = new Fire(x - GameField.GRID_SIZE, y, session);// * i
+            fire[2] = new Fire(x, y + GameField.GRID_SIZE, session);// * i
+            fire[3] = new Fire(x, y - GameField.GRID_SIZE, session);// * i
+        toBurn.add(fire[0].getPosition());
+        toBurn.add(fire[1].getPosition());
+        toBurn.add(fire[2].getPosition());
+        toBurn.add(fire[3].getPosition());
+//            for (int j = 0; j < 4; j++) {
+//                int flag = 0;
+//                for (GameObject o : gameObjects) {
+//                    if (fire[j].isColliding((Collider) o)
+//                            && this != o) {
+//                        flag = 1;
+//                        if (((o instanceof Wood) || (o instanceof Pawn))) {
+//                            //((Temporary) o).destroy();
+//                            //session.addGameObject(fire[j]);
+//                            toBurn.add(fire[j].getPosition());
+//                            break;
+//                        }
+//                    }
+//                }
+//                if (flag == 0) {
+//                    session.addGameObject(fire[j]);
+//                }
+//            }
+//        }
         for (GameObject o : gameObjects) {
             if (o instanceof Temporary) {
                 if (!(o instanceof Bomb)) {
                     if (o instanceof Positionable) {
-                        if ((abs(((Positionable) o).getPosition().getX() - this.position.getX()) <= GameField.GRID_SIZE * 9 / 5// align explosion
+                        if ((abs(((Positionable) o).getPosition().getX() - this.position.getX()) <= GameField.GRID_SIZE * 3 / 2// align explosion
                                 && Math.abs(((Positionable) o).getPosition().getY() - this.position.getY()) <= 10)
-                                || (abs(((Positionable) o).getPosition().getY() - this.position.getY()) <= GameField.GRID_SIZE * 9 / 5
+                                || (abs(((Positionable) o).getPosition().getY() - this.position.getY()) <= GameField.GRID_SIZE * 3 / 2
                                 && Math.abs(((Positionable) o).getPosition().getX() - this.position.getX()) <= 10)) {
                             ((Temporary) o).destroy();
-                            toBurn.add(((Positionable)o).getPosition());
+                            //toBurn.add(((Positionable)o).getPosition());
                         }
                     }
                 }

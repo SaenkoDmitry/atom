@@ -1,5 +1,6 @@
 package ru.atom.bombergirl.game.model.model;
 
+import ru.atom.bombergirl.game.model.geometry.Collider;
 import ru.atom.bombergirl.game.model.geometry.Point;
 import ru.atom.bombergirl.mmserver.GameSession;
 
@@ -58,5 +59,20 @@ public class Fire implements GameObject, Positionable, Temporary, Tickable {
     @Override
     public void destroy() {
         isDead = true;
+    }
+
+    public boolean isColliding(Collider c) {
+        if (this.getPosition().getX() - (GameField.GRID_SIZE / 3) < c.getPosition().getX() + GameField.GRID_SIZE / 2
+                && this.getPosition().getY() - (GameField.GRID_SIZE / 3) < c.getPosition().getY() + GameField.GRID_SIZE / 2
+                && this.getPosition().getX() + (GameField.GRID_SIZE / 3) > c.getPosition().getX() - GameField.GRID_SIZE / 2
+                && this.getPosition().getY() + (GameField.GRID_SIZE / 3) > c.getPosition().getY() - GameField.GRID_SIZE / 2
+                || c.getPosition().getX() - GameField.GRID_SIZE / 2 < this.getPosition().getX() + (GameField.GRID_SIZE / 3)
+                && c.getPosition().getY() - GameField.GRID_SIZE / 2 < this.getPosition().getY() + (GameField.GRID_SIZE / 3)
+                && c.getPosition().getX() + GameField.GRID_SIZE / 2 > this.getPosition().getX() - (GameField.GRID_SIZE / 3)
+                && c.getPosition().getY() + GameField.GRID_SIZE / 2 > this.getPosition().getY() - (GameField.GRID_SIZE / 3)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

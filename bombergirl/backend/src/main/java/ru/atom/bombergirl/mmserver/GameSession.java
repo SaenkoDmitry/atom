@@ -25,6 +25,8 @@ public class GameSession implements Tickable, Runnable {
     private List<GameObject> gameObjects = new CopyOnWriteArrayList<>();
     private static AtomicInteger counter = new AtomicInteger(0);
     private List<ObjectMessage> objectMessages = new ArrayList<>();
+    private static
+    List<Temporary> dead = new CopyOnWriteArrayList<>();
 
     public static final int PLAYERS_IN_GAME = 4;
 
@@ -105,8 +107,8 @@ public class GameSession implements Tickable, Runnable {
         gameObjects.forEach(x -> objectMessages.add(
                 new ObjectMessage(x.getClass().getSimpleName(), x.getId(),
                         ((Positionable)x).getPosition())));
+        gameObjects.removeAll(dead);
         Broker.getInstance().broadcast(Topic.REPLICA,  objectMessages);
-        List<Temporary> dead = new CopyOnWriteArrayList<>();
         for (GameObject gameObject : gameObjects) {
             if (gameObject instanceof Tickable) {
                 ((Tickable) gameObject).tick(elapsed);

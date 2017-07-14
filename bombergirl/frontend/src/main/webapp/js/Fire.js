@@ -52,10 +52,18 @@ Fire = Entity.extend({
 
     remove: function() {
         gGameEngine.stage.removeChild(this.bmp);
-        for (var i = 0; i < gGameEngine.fires.length; i++) {
-            var fire = gGameEngine.fires[i];
+
+        for (var i = 0; i < this.bomb.fires.length; i++) {
+            var fire = this.bomb.fires[i];
             if (this == fire) {
-                gGameEngine.fires.splice(i, 1);
+                this.bomb.fires.splice(i, 1);
+            }
+        }
+
+        for (var i = 0; i < gGameEngine.bombs.length; i++) {
+            var bomb = gGameEngine.bombs[i];
+            if (this.bomb == bomb) {
+                gGameEngine.bombs.splice(i, 1);
             }
         }
     }
