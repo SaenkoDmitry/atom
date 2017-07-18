@@ -6,7 +6,7 @@
     <!--<div id="authorizeUser"  style="display: none;">-->
         <h2>Welcome back, <p id="username"></p></h2>
 
-        <button type="button" style="font-size:large" onclick="newGame()" >New Game</button>
+        <button class="a_demo_two" type="button" style="font-size:large" onclick="newGame(this)" >New Game</button>
         <br>
         <button type="button" class="logoutButton" style="font-size:large" onclick="logout()" >Logout</button>
     <!--</div>-->
@@ -26,9 +26,11 @@
 </script>
 
 <script>
-    function newGame() {
+    function newGame(obj) {
         console.log('new game !!!!');
+        $(obj).addClass('selected');
         var url = window.location.origin.slice(0, window.location.origin.length - 2) + "90/mm/join";
+        var urlWait = window.location.origin.slice(0, window.location.origin.length - 2) + "85/gs/0/index.html";
 
         console.log('origin', window.location.origin);
         console.log('url', url);
@@ -42,7 +44,14 @@
                 'token': Cookies.get('token')
             }
         };
+
+        var settingsWait = {
+            "method": "GET",
+            "crossDomain": true,
+            "url": urlWait
+        };
         $.ajax(settings).done(function(response) {
+            $.ajax(settingsWait).done();
             window.location.assign(response);
             return false;
         }).fail(function (jqXHR, textStatus) {

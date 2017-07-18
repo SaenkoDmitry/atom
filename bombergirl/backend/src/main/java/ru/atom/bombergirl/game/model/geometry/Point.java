@@ -1,5 +1,7 @@
 package ru.atom.bombergirl.game.model.geometry;
 
+import ru.atom.bombergirl.game.model.model.GameField;
+
 public class Point {
     private final int x;
     private final int y;
@@ -7,6 +9,11 @@ public class Point {
     public Point(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public Point getSmallValues() {
+        return new Point((int)Math.round((double)x / (double)GameField.GRID_SIZE),
+                (int)Math.round((double)y / (double)GameField.GRID_SIZE));
     }
 
     public int getX() {

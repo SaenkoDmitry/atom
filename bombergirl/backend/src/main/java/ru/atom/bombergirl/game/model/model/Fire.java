@@ -22,6 +22,12 @@ public class Fire implements GameObject, Positionable, Temporary, Tickable {
         this.id = GameSession.nextValue();
     }
 
+    public Fire(Point position, GameSession session) {
+        this.position = position;
+        this.session = session;
+        this.id = GameSession.nextValue();
+    }
+
     @Override
     public int getId() {
         return id;
@@ -61,18 +67,4 @@ public class Fire implements GameObject, Positionable, Temporary, Tickable {
         isDead = true;
     }
 
-    public boolean isColliding(Collider c) {
-        if (this.getPosition().getX() - (GameField.GRID_SIZE / 3) < c.getPosition().getX() + GameField.GRID_SIZE / 2
-                && this.getPosition().getY() - (GameField.GRID_SIZE / 3) < c.getPosition().getY() + GameField.GRID_SIZE / 2
-                && this.getPosition().getX() + (GameField.GRID_SIZE / 3) > c.getPosition().getX() - GameField.GRID_SIZE / 2
-                && this.getPosition().getY() + (GameField.GRID_SIZE / 3) > c.getPosition().getY() - GameField.GRID_SIZE / 2
-                || c.getPosition().getX() - GameField.GRID_SIZE / 2 < this.getPosition().getX() + (GameField.GRID_SIZE / 3)
-                && c.getPosition().getY() - GameField.GRID_SIZE / 2 < this.getPosition().getY() + (GameField.GRID_SIZE / 3)
-                && c.getPosition().getX() + GameField.GRID_SIZE / 2 > this.getPosition().getX() - (GameField.GRID_SIZE / 3)
-                && c.getPosition().getY() + GameField.GRID_SIZE / 2 > this.getPosition().getY() - (GameField.GRID_SIZE / 3)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

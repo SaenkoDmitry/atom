@@ -14,14 +14,46 @@ input[type=text], input[type=password] {
 
 /* Set a style for all buttons */
 button {
-    background-color: #4CAF50;
-    color: white;
+    background-color: #109c56;
+    color: #ffffff;
     padding: 14px 20px;
     margin: 8px 0;
     border: none;
     cursor: pointer;
     width: 100%;
+    position:relative;
+    font-family: 'Open Sans', sans-serif;
+    font-size:16px;
+    text-decoration:none;
+    background-image: linear-gradient(bottom, rgb(64, 190, 235) 0%, rgb(79, 194, 232) 100%);
+    box-shadow: inset 0px 1px 0px #9e8d84, 0px 5px 0px 0px #474649, 0px 10px 5px #999;
+    border-radius: 5px;
 }
+
+button.selected {
+    top:7px;
+    background-image: linear-gradient(bottom, rgb(10, 78, 105) 0%, rgb(14, 118, 158) 100%);
+    box-shadow:inset 0px 1px 0px #2ab7ec, 0px 5px 0px 0px #032b3a;
+    color: #156785;
+    text-shadow: 0px 1px 1px rgba(255,255,255,0.3);
+    background: rgb(44,160,202);
+}
+
+
+.a_demo_two {
+    /*background-color: #43c3f1;*/
+    padding:10px;
+    position:relative;
+    font-family: 'Open Sans', sans-serif;
+    font-size:12px;
+    text-decoration:none;
+    color:#fff;
+    background-image: linear-gradient(bottom, rgb(64, 190, 235) 0%, rgb(79, 194, 232) 100%);
+    box-shadow: inset 0px 1px 0px #9e8d84, 0px 5px 0px 0px #474649, 0px 10px 5px #999;
+    border-radius: 5px;
+}
+
+
 
 /* Add a hover effect for buttons */
 button:hover {
@@ -34,7 +66,17 @@ button:hover {
 }
 
 .logoutButton {
-    width: auto;
-    padding: 10px 18px;
-    background-color: #f44336;
+    background-color: #c4162b;
+    font-family: 'Open Sans', sans-serif;
+    font-size:12px;
+    text-decoration:none;
+    color:#fff;
+    position:relative;
+    padding:10px 20px;
+    padding-right:50px;
+    background-image: linear-gradient(bottom, rgb(109, 41, 25) 0%, rgb(180, 18, 38) 100%);
+    border-radius: 5px;
+    box-shadow: inset 0px 1px 0px #9e8d84, 0px 5px 0px 0px #322620, 0px 10px 5px #999;
 }
+
+

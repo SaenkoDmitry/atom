@@ -14,32 +14,29 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class MatchMaker implements Runnable {
     private static final Logger log = LogManager.getLogger(MatchMakerServer.class);
-    private static AtomicLong idGame = new AtomicLong();
+    //private static AtomicLong idGame = new AtomicLong();
 
-    public static Long getIdGame() {
+    /*public static Long getIdGame() {
         return idGame.get();
-    }
+    }*/
 
     @Override
     public void run() {
         log.info("MM Started");
         List<Connection> candidates = new ArrayList<>(GameSession.PLAYERS_IN_GAME);
-        EventServer server = new EventServer(idGame);
+        EventServer server = new EventServer();
         Thread eventServer = new Thread(server);
-        eventServer.setName("eventServer " + idGame);
+        eventServer.setName("eventServer");
         eventServer.start();
         log.info(eventServer);
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                log.info("I'm here");
                 log.info("ThreadSafeQueue size is " + ThreadSafeQueue.getInstance().size());
-                Connection connection;
 //                while ((connection = ThreadSafeQueue.getInstance()
 //                        .poll(10_000, TimeUnit.MILLISECONDS) ) != null ) {
 //                    candidates.add(connection);
 //                }
-                connection = ThreadSafeQueue.getInstance().poll(10_000, TimeUnit.SECONDS);
-                if (connection != null) {
+                Connection connection = ThreadSafeQueue.getInstance().poll(10_000, TimeUnit.SECONDS);if (connection != null) {
                     candidates.add(connection);
                 }
                 log.info("Finally I'm here");
@@ -50,21 +47,19 @@ public class MatchMaker implements Runnable {
             }
 
             if (candidates.size() == GameSession.PLAYERS_IN_GAME) {
-                log.info("I create session");
                 GameSession session = new GameSession(candidates.toArray(new Connection[0]));
                 Thread gameSession = new Thread(session);
-                gameSession.setName("gameSession " + idGame);
+                gameSession.setName("gameSession " + session.getIdGame());
                 gameSession.start();
                 log.info(session);
-                ThreadSafeStorage.put(session);
+                GameSessionPool.put(session);
                 candidates.clear();
-                idGame.getAndIncrement();
-                server = new EventServer(idGame);
-                eventServer = new Thread(server);
-                eventServer.setName("eventServer " + idGame);
-                eventServer.start();
-                log.info(eventServer);
-                log.info("idGame : " + idGame);
+//                server = new EventServer(idGame);
+//                eventServer = new Thread(server);
+//                eventServer.setName("eventServer " + idGame);
+//                eventServer.start();
+//                log.info(eventServer);
+//                log.info("idGame : " + idGame);
             }
         }
     }

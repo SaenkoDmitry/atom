@@ -9,9 +9,7 @@ import ru.atom.bombergirl.communication.message.Topic;
 import ru.atom.bombergirl.communication.network.Broker;
 import ru.atom.bombergirl.communication.util.JsonHelper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -25,19 +23,31 @@ public class GameSession implements Tickable, Runnable {
     private List<GameObject> gameObjects = new CopyOnWriteArrayList<>();
     private static AtomicInteger counter = new AtomicInteger(0);
     private List<ObjectMessage> objectMessages = new ArrayList<>();
-    private static
+    private long idGame;
     List<Temporary> dead = new CopyOnWriteArrayList<>();
+    private final Connection[] connections;
+    private final long id = idGenerator.get();
+    private List<GameObject> gameField = new ArrayList<>();
+    //private HashMap <Point, GameObject> objects = new HashMap<>();
 
     public static final int PLAYERS_IN_GAME = 4;
 
-    private final Connection[] connections;
-    private final long id = idGenerator.getAndIncrement();
+    public GameSession(Connection[] connections) {
+        this.connections = connections;
+        idGame = idGenerator.getAndIncrement();
+    }
 
-    private static List<GameObject> gameField = new ArrayList<>();
+    public long getIdGame() {
+        return idGame;
+    }
 
-    static {
+
+    public void initialField() {
+
+        //adding walls and woods
         for (int i = 0;i < 17;i++) {
             for (int j = 0;j < 13;j++) {
+                Point point = new Point(GameField.GRID_SIZE * i, GameField.GRID_SIZE * j);
                 if (i == 1 && j == 1
                         || i == 1 && j == 11
                         || i == 15 && j == 1
@@ -55,42 +65,31 @@ public class GameSession implements Tickable, Runnable {
                         || i == 0
                         || j == 0
                         || i == 16
-                        || j == 12)
-                    gameField.add(new Wall(GameField.GRID_SIZE * i, GameField.GRID_SIZE * j));
-                else
-                    gameField.add(new Wood(GameField.GRID_SIZE * i, GameField.GRID_SIZE * j));
+                        || j == 12) {
+                    gameObjects.add(new Wall(point));
+                }
+                else {
+                    gameObjects.add(new Wood(point));
+                }
             }
+        }
+
+        // adding pawns
+        for (int i = 0; i < connections.length; i++) {
+            Pawn pawn = new Pawn(spawnPositions.get(i), this);
+            connections[i].setGirl(pawn);
+            log.info("set pawn : " + connections[i].getPawn());
+            Broker.getInstance().send(connections[i], Topic.POSSESS, pawn.getId());
+            gameObjects.add(pawn);
         }
     }
 
-    private static List<Point> grassPositions = new ArrayList<>(Arrays.asList(
-            new Point(GameField.GRID_SIZE, GameField.GRID_SIZE),
-            new Point(GameField.GRID_SIZE, GameField.GRID_SIZE * 2),
-            new Point(GameField.GRID_SIZE * 2, GameField.GRID_SIZE),
-
-            new Point(GameField.GRID_SIZE * 15, GameField.GRID_SIZE),
-            new Point(GameField.GRID_SIZE * 14, GameField.GRID_SIZE * 11),
-            new Point(GameField.GRID_SIZE * 15, GameField.GRID_SIZE * 2),
-
-            new Point(GameField.GRID_SIZE, GameField.GRID_SIZE * 10),
-            new Point(GameField.GRID_SIZE, GameField.GRID_SIZE * 11),
-            new Point(GameField.GRID_SIZE * 2, GameField.GRID_SIZE),
-
-            new Point(GameField.GRID_SIZE * 15, GameField.GRID_SIZE * 11),
-            new Point(GameField.GRID_SIZE * 15, GameField.GRID_SIZE * 10),
-            new Point(GameField.GRID_SIZE * 14, GameField.GRID_SIZE * 11)
-    ));
-
-    private static List<Point> spawnPositions = new ArrayList<>(Arrays.asList(
+    private List<Point> spawnPositions = new ArrayList<>(Arrays.asList(
             new Point(GameField.GRID_SIZE, GameField.GRID_SIZE),
             new Point(GameField.GRID_SIZE, GameField.GRID_SIZE * 11),
             new Point(GameField.GRID_SIZE * 15, GameField.GRID_SIZE),
             new Point(GameField.GRID_SIZE * 15, GameField.GRID_SIZE * 11)
     ));
-
-    public GameSession(Connection[] connections) {
-        this.connections = connections;
-    }
 
     public static int nextValue() {
         return counter.getAndIncrement();
@@ -102,13 +101,18 @@ public class GameSession implements Tickable, Runnable {
 
     @Override
     public void tick(long elapsed) {
-        //log.info("tick");
         objectMessages.clear();
         gameObjects.forEach(x -> objectMessages.add(
                 new ObjectMessage(x.getClass().getSimpleName(), x.getId(),
                         ((Positionable)x).getPosition())));
         gameObjects.removeAll(dead);
-        Broker.getInstance().broadcast(Topic.REPLICA,  objectMessages);
+        dead.clear();
+
+        for (int i = 0; i < connections.length; i++) {
+            Broker.getInstance().send(connections[i], Topic.REPLICA, objectMessages);
+        }
+        //Broker.getInstance().broadcast(Topic.REPLICA,  objectMessages);
+
         for (GameObject gameObject : gameObjects) {
             if (gameObject instanceof Tickable) {
                 ((Tickable) gameObject).tick(elapsed);
@@ -122,34 +126,27 @@ public class GameSession implements Tickable, Runnable {
     }
 
     public void addGameObject(GameObject gameObject) {
+        //objects.put(((Positionable)gameObject).getPosition(), gameObject);
         gameObjects.add(gameObject);
     }
 
     public void run() {
-        gameObjects.addAll(gameField);
+        initialField();
 
-        // adding pawns
-        for (int i = 0; i < connections.length; i++) {
-            Pawn pawn = new Pawn(spawnPositions.get(i), this);
-            connections[i].setGirl(pawn);
-            log.info("set pawn : " + connections[i].getPawn());
-            Broker.getInstance().send(connections[i], Topic.POSSESS, pawn.getId());
-            gameObjects.add(pawn);
-        }
-
-//        // adding grass
-//        for (int i = 0; i < grassPositions.size(); i++) {
-//            gameObjects.add(new Grass(grassPositions.get(i).getX(), grassPositions.get(i).getY()));
-//        }
-
+        //adding objects to message
         gameObjects.forEach(x -> objectMessages.add(
                 new ObjectMessage(x.getClass().getSimpleName(), x.getId(), ((Positionable)x).getPosition())));
         log.info(JsonHelper.toJson(objectMessages));
-        Broker.getInstance().broadcast(Topic.REPLICA,  objectMessages);
 
-        log.info(Thread.currentThread().getName() + " started");
+        //sending message to all users for rendering
+        for (int i = 0; i < connections.length; i++) {
+            Broker.getInstance().send(connections[i], Topic.REPLICA, objectMessages);
+        }
+
+        //start changing the world by ticker
         Ticker ticker = new Ticker(this);
         ticker.loop();
+        log.info(Thread.currentThread().getName() + " started");
     }
 
     @Override

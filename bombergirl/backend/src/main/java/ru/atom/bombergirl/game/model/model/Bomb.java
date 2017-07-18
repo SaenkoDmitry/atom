@@ -20,6 +20,7 @@ public class Bomb implements GameObject, Positionable, Temporary, Tickable, Coll
     private long workTime = 0;
     private boolean isDead = false;
     private final int id;
+    private static int idBomb = 0;
     private int length = 1;
     private GameSession session;
     private int pawnId;
@@ -33,6 +34,7 @@ public class Bomb implements GameObject, Positionable, Temporary, Tickable, Coll
         this.session = session;
         this.pawnId = pawnId;
         id = GameSession.nextValue();
+        idBomb++;
     }
 
     public static void create(Point position, GameSession session, int pawnId) {
@@ -60,7 +62,6 @@ public class Bomb implements GameObject, Positionable, Temporary, Tickable, Coll
         workTime += elapsed;
         if (workTime >= lifetime) {
             destroy();
-            isDead = true;
         }
     }
 
@@ -75,40 +76,27 @@ public class Bomb implements GameObject, Positionable, Temporary, Tickable, Coll
     }
 
     public void destroy() {
+        isDead = true;
         List<GameObject> gameObjects = session.getGameObjects();
         List<Point> toBurn = new ArrayList<>(Arrays.asList(position));
         int x = position.getX();
         int y = position.getY();
-        //session.addGameObject(new Fire(position.getX(), position.getY(), session));
-//        for (int i = 1; i <= length; i++) {
-            Fire[] fire = new Fire[4];
-            fire[0] = new Fire(x + GameField.GRID_SIZE, y, session);// * i
-            fire[1] = new Fire(x - GameField.GRID_SIZE, y, session);// * i
-            fire[2] = new Fire(x, y + GameField.GRID_SIZE, session);// * i
-            fire[3] = new Fire(x, y - GameField.GRID_SIZE, session);// * i
-        toBurn.add(fire[0].getPosition());
-        toBurn.add(fire[1].getPosition());
-        toBurn.add(fire[2].getPosition());
-        toBurn.add(fire[3].getPosition());
-//            for (int j = 0; j < 4; j++) {
-//                int flag = 0;
-//                for (GameObject o : gameObjects) {
-//                    if (fire[j].isColliding((Collider) o)
-//                            && this != o) {
-//                        flag = 1;
-//                        if (((o instanceof Wood) || (o instanceof Pawn))) {
-//                            //((Temporary) o).destroy();
-//                            //session.addGameObject(fire[j]);
-//                            toBurn.add(fire[j].getPosition());
-//                            break;
-//                        }
-//                    }
-//                }
-//                if (flag == 0) {
-//                    session.addGameObject(fire[j]);
-//                }
-//            }
-//        }
+        Point[] points = new Point[4];
+        points[0] = new Point(x + GameField.GRID_SIZE, y);
+        points[1] = new Point(x - GameField.GRID_SIZE, y);
+        points[2] = new Point(x, y + GameField.GRID_SIZE);
+        points[3] = new Point(x, y - GameField.GRID_SIZE);
+        Fire[] fire = new Fire[4];
+        fire[0] = new Fire(points[0], session);// * i
+        fire[1] = new Fire(points[1], session);
+        fire[2] = new Fire(points[2], session);
+        fire[3] = new Fire(points[3], session);
+        for (int i = 0; i < 4; i++) {
+            if (GameField.field[points[i].getSmallValues().getX()]
+                    [points[i].getSmallValues().getY()] == 0) {
+                toBurn.add(fire[i].getPosition());
+            }
+        }
         for (GameObject o : gameObjects) {
             if (o instanceof Temporary) {
                 if (!(o instanceof Bomb)) {
@@ -118,7 +106,6 @@ public class Bomb implements GameObject, Positionable, Temporary, Tickable, Coll
                                 || (abs(((Positionable) o).getPosition().getY() - this.position.getY()) <= GameField.GRID_SIZE * 3 / 2
                                 && Math.abs(((Positionable) o).getPosition().getX() - this.position.getX()) <= 10)) {
                             ((Temporary) o).destroy();
-                            //toBurn.add(((Positionable)o).getPosition());
                         }
                     }
                 }

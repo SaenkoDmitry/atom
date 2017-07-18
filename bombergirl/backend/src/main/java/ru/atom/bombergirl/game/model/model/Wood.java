@@ -18,6 +18,11 @@ public class Wood implements Block, GameObject, Positionable, Temporary {
         id = GameSession.nextValue();
     }
 
+    public Wood(Point position) {
+        this.position = position;
+        id = GameSession.nextValue();
+    }
+
     @Override
     public int getId() {
         return id;

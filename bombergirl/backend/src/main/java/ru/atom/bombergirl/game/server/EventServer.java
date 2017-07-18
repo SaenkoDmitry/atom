@@ -15,32 +15,31 @@ import ru.atom.bombergirl.server.CrossBrowserFilter;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class EventServer implements Runnable{
+public class EventServer implements Runnable {
 
-    private static AtomicLong idforurl = new AtomicLong(0);
+    //private static AtomicLong idforurl = new AtomicLong(0);
 
     public static void main(String[] args) {
         Server server = new Server();
         ServerConnector connector = new ServerConnector(server);
-        connector.setPort((int) (8085 + idforurl.get() * 10));
+        connector.setPort(8085);
         server.addConnector(connector);
 
         // Setup the basic application "context" for this application at "/"
         // This is also known as the handler tree (in jetty speak)
 
         ContextHandlerCollection contexts = new ContextHandlerCollection();
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/");
         contexts.setHandlers(new Handler[]{
             //createGsContext(),
+                createServerContext(),
             createResourceContext(),
-            context
+            //context
         });
         server.setHandler(contexts);
 
         // Add a websocket to a specific path spec
         ServletHolder holderEvents = new ServletHolder("ws-events", EventServlet.class);
-        context.addServlet(holderEvents, "/");
+        //context.addServlet(holderEvents, "/");
 
         try {
             server.start();
@@ -51,47 +50,62 @@ public class EventServer implements Runnable{
         }
     }
 
-    private static ServletContextHandler createGsContext() {
-        ServletContextHandler context = new ServletContextHandler();
+    private static ServletContextHandler createServerContext() {
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         ServletHolder jerseyServlet = context.addServlet(
                 org.glassfish.jersey.servlet.ServletContainer.class, "/*");
         jerseyServlet.setInitOrder(0);
 
+        ServletHolder holderEvents = new ServletHolder("ws-events", EventServlet.class);
+        context.addServlet(holderEvents, "/events/*");
         jerseyServlet.setInitParameter(
                 "jersey.config.server.provider.packages",
-                "ru.atom.bombergirl.gameserver"
-        );
-
-        jerseyServlet.setInitParameter(
-                "com.sun.jersey.spi.container.ContainerResponseFilters",
-                CrossBrowserFilter.class.getCanonicalName()
+                "ru.atom.bombergirl.communication.network"
         );
 
         return context;
     }
 
+//    private static ServletContextHandler createGsContext() {
+//        ServletContextHandler context = new ServletContextHandler();
+//        context.setContextPath("/");
+//        ServletHolder jerseyServlet = context.addServlet(
+//                org.glassfish.jersey.servlet.ServletContainer.class, "/*");
+//        jerseyServlet.setInitOrder(0);
+//
+//        jerseyServlet.setInitParameter(
+//                "jersey.config.server.provider.packages",
+//                "ru.atom.bombergirl.gameserver"
+//        );
+//
+//        jerseyServlet.setInitParameter(
+//                "com.sun.jersey.spi.container.ContainerResponseFilters",
+//                CrossBrowserFilter.class.getCanonicalName()
+//        );
+//
+//        return context;
+//    }
+
     private static ContextHandler createResourceContext() {
         ContextHandler context = new ContextHandler();
-        context.setCompactPath(true);
-        context.setContextPath("/gs/" + idforurl.toString() + "/*");
+        context.setContextPath("/gs/0");
         ResourceHandler handler = new ResourceHandler();
         String eventRoot = EventServer.class.getResource("/static").toString();
         String serverRoot = eventRoot.substring(0, eventRoot.length() - 35) + "frontend/src/main/webapp";
-        handler.setWelcomeFiles(new String[]{serverRoot + "index.html"});
+        handler.setWelcomeFiles(new String[]{"index.html"});
         handler.setResourceBase(serverRoot);
         context.setHandler(handler);
         return context;
     }
 
-    public EventServer (AtomicLong id) {
-        idforurl = id;
-    }
-
+//    public EventServer (AtomicLong id) {
+//        idforurl = id;
+//    }
+//
     @Override
     public void run() {
         String[] args = new String[0];
-        System.out.println("Event server with idforurl " + idforurl.toString()+" started");
         EventServer.main(args);
     }
 }

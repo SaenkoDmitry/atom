@@ -13,7 +13,8 @@ Menu = Class.extend({
     show: function(text) {
         this.visible = true;
 
-        this.draw(text);
+        // this.draw(text);
+        this.setMode('single');
     },
 
     hide: function() {

@@ -17,6 +17,11 @@ public class Wall implements Block, GameObject, Positionable {
         id = GameSession.nextValue();
     }
 
+    public Wall(Point position) {
+        this.position = position;
+        id = GameSession.nextValue();
+    }
+
     @Override
     public int getId() {
         return id;
