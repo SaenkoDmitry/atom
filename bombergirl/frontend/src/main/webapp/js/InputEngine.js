@@ -30,9 +30,9 @@ InputEngine = Class.extend({
 
         this.bind(32, 'bomb');
 
-        this.bind(13, 'restart');
-        this.bind(27, 'escape');
-        this.bind(77, 'mute');
+        // this.bind(13, 'restart');
+        // this.bind(27, 'escape');
+        // this.bind(77, 'mute');
 
         // move multiple presses with fps frequency
         this.keyboardController({

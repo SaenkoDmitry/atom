@@ -2,6 +2,7 @@ package ru.atom.bombergirl.mmserver;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.atom.bombergirl.communication.message.EndMessage;
 import ru.atom.bombergirl.game.model.geometry.Point;
 import ru.atom.bombergirl.game.model.model.*;
 import ru.atom.bombergirl.communication.message.ObjectMessage;
@@ -10,6 +11,7 @@ import ru.atom.bombergirl.communication.network.Broker;
 import ru.atom.bombergirl.communication.util.JsonHelper;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,6 +28,7 @@ public class GameSession implements Tickable, Runnable {
     private long idGame;
     List<Temporary> dead = new CopyOnWriteArrayList<>();
     private final Connection[] connections;
+    private ConcurrentHashMap<Connection, Boolean> survived = new ConcurrentHashMap<>();
     private final long id = idGenerator.get();
     private List<GameObject> gameField = new ArrayList<>();
     //private HashMap <Point, GameObject> objects = new HashMap<>();
@@ -34,6 +37,9 @@ public class GameSession implements Tickable, Runnable {
 
     public GameSession(Connection[] connections) {
         this.connections = connections;
+        for (Connection conn: connections) {
+            survived.put(conn, true);
+        }
         idGame = idGenerator.getAndIncrement();
     }
 
@@ -108,8 +114,23 @@ public class GameSession implements Tickable, Runnable {
         gameObjects.removeAll(dead);
         dead.clear();
 
+        EndMessage endGameWin = new EndMessage(1);
+        EndMessage endGameLose = new EndMessage(0);
+
         for (int i = 0; i < connections.length; i++) {
-            Broker.getInstance().send(connections[i], Topic.REPLICA, objectMessages);
+            if (connections[i].getPawn().isDead() && survived.containsKey(connections[i])) {
+                survived.remove(connections[i]);
+                Broker.getInstance().send(connections[i], Topic.REPLICA, objectMessages);
+                Broker.getInstance().send(connections[i], Topic.END_MATCH, endGameLose);
+                connections[i].getSession().close();
+            }
+            if (survived.get(connections[i]) != null && survived.get(connections[i]))
+                Broker.getInstance().send(connections[i], Topic.REPLICA, objectMessages);
+        }
+        if (survived.size() == 1) {
+            Broker.getInstance().send(survived.keySet().iterator().next(), Topic.REPLICA, objectMessages);
+            Broker.getInstance().send(survived.keySet().iterator().next(), Topic.END_MATCH, endGameWin);
+            survived.keySet().iterator().next().getSession().close();
         }
         //Broker.getInstance().broadcast(Topic.REPLICA,  objectMessages);
 

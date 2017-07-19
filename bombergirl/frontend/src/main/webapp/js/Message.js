@@ -49,6 +49,19 @@ Messages = Class.extend({
         gInputEngine.possessed = parseInt(msg.data);
     },
 
+    handleEndMatch: function (msg) {
+        var res = JSON.parse(msg.data).gameEnd;
+
+        if (res === 0) {
+            alert("You lose. Try again?");
+            gGameEngine.restart();
+        }
+        else if (res === 1) {
+            alert("You win! Are you wanna get it again?");
+            gGameEngine.restart();
+        }
+    },
+
     handlePawn: function(obj) {
         var player = gGameEngine.players.find(function (el) {
             return el.id === obj.id;
@@ -59,7 +72,7 @@ Messages = Class.extend({
             player.bmp.x = position.x;
             player.bmp.y = position.y;
         } else {
-            console.log(new Date().getTime() + " handel new player " + obj.id);
+            console.log(new Date().getTime() + " handle new player " + obj.id);
             player = new Player(obj.id, position);
             gGameEngine.players.push(player);
         }
