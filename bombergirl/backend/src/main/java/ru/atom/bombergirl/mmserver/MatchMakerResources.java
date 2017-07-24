@@ -22,6 +22,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.Random;
 import java.util.List;
@@ -63,7 +64,9 @@ public class MatchMakerResources {
             }
             return Response.status(Response.Status.BAD_REQUEST).entity("Exception occured.").build();
         }
-        return Response.ok("http://localhost:" + 8085 + "/gs/0" + "/index.html")
+        MatchMaker.addGameToken(strToken);
+        MatchMaker.waitIfNeeded(strToken);
+        return Response.ok("http://192.168.1.101:" + 8085 + "/gs/0" + "/index.html")
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
                 .header("Access-Control-Allow-Credentials", "true")

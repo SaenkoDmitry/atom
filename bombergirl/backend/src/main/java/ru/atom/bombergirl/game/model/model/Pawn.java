@@ -16,7 +16,9 @@ public class Pawn implements GameObject, Positionable, Movable, Tickable, Collid
     private boolean isDead = false;
     private Point position;
     private int step = 1;
-    //private Direction direction = Direction.IDLE;
+    private int numberOfBombs = 1;
+    private int activeBombs = 0;
+    private int powerOfBombs = 1;
     private final int id;
     private boolean toPlantBomb = false;
     private List<Action> actions = new CopyOnWriteArrayList<>();
@@ -43,12 +45,33 @@ public class Pawn implements GameObject, Positionable, Movable, Tickable, Collid
         if (!toPlantBomb) {
             return;
         }
-        Bomb.create(this.position, session, id);
+        activeBombs++;
+        Bomb.create(this.position, session, id, powerOfBombs, this);
         toPlantBomb = false;
     }
 
+    public void decreaseActiveBombs() {
+        activeBombs--;
+    }
+
     public void makePlantBomb() {
-        toPlantBomb = true;
+        if (activeBombs < numberOfBombs)
+            toPlantBomb = true;
+    }
+
+    public void enhanceSpeed() {
+        if (step < 5)
+            step++;
+    }
+
+    public void enhancePowerOfBombs() {
+        if (powerOfBombs < 5)
+            powerOfBombs++;
+    }
+
+    public void enhanceNumberOfBombs() {
+        if (numberOfBombs < 5)
+            numberOfBombs++;
     }
 
     @Override
@@ -79,6 +102,21 @@ public class Pawn implements GameObject, Positionable, Movable, Tickable, Collid
             if (this.isColliding((Collider) o)
                     && this != o
                     && !(o instanceof Pawn)) {
+                if (o instanceof BonusSpeed && !((BonusSpeed) o).isDead()) {
+                    enhanceSpeed();
+                    ((Temporary)o).destroy();
+                    return position;
+                }
+                else if (o instanceof BonusBomb && !((BonusBomb) o).isDead()) {
+                    enhanceNumberOfBombs();
+                    ((Temporary)o).destroy();
+                    return position;
+                }
+                else if (o instanceof BonusFire && !((BonusFire) o).isDead()) {
+                    enhancePowerOfBombs();
+                    ((Temporary)o).destroy();
+                    return position;
+                }
                 return preChangePosition;
             }
         }
@@ -94,14 +132,8 @@ public class Pawn implements GameObject, Positionable, Movable, Tickable, Collid
                 return false;
             }
         }
-        if (this.getPosition().getX() - (GameField.GRID_SIZE / 5 * 2) < c.getPosition().getX() + GameField.GRID_SIZE / 2
-                && this.getPosition().getY() - (GameField.GRID_SIZE / 5 * 2) < c.getPosition().getY() + GameField.GRID_SIZE / 2
-                && this.getPosition().getX() + (GameField.GRID_SIZE / 5 * 2) > c.getPosition().getX() - GameField.GRID_SIZE / 2
-                && this.getPosition().getY() + (GameField.GRID_SIZE / 5 * 2) > c.getPosition().getY() - GameField.GRID_SIZE / 2
-                || c.getPosition().getX() - GameField.GRID_SIZE / 2 < this.getPosition().getX() + (GameField.GRID_SIZE / 5 * 2)
-                && c.getPosition().getY() - GameField.GRID_SIZE / 2 < this.getPosition().getY() + (GameField.GRID_SIZE / 5 * 2)
-                && c.getPosition().getX() + GameField.GRID_SIZE / 2 > this.getPosition().getX() - (GameField.GRID_SIZE / 5 * 2)
-                && c.getPosition().getY() + GameField.GRID_SIZE / 2 > this.getPosition().getY() - (GameField.GRID_SIZE / 5 * 2)) {
+        if (Math.abs(this.getPosition().getX() - c.getPosition().getX()) < GameField.GRID_SIZE - 7
+                && Math.abs(this.getPosition().getY() - c.getPosition().getY()) < GameField.GRID_SIZE - 7) {
             return true;
         } else {
             return false;

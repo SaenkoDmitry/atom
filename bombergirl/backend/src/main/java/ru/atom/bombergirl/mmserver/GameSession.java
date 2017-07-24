@@ -23,15 +23,15 @@ public class GameSession implements Tickable, Runnable {
     private static final Logger log = LogManager.getLogger(MatchMaker.class);
     private static AtomicLong idGenerator = new AtomicLong();
     private List<GameObject> gameObjects = new CopyOnWriteArrayList<>();
+    private ConcurrentHashMap<Point, GameObject> gameField = new ConcurrentHashMap<>();
+    //private LinkedHashMap<Point, GameObject> gameObjects = new LinkedHashMap<>();
     private static AtomicInteger counter = new AtomicInteger(0);
     private List<ObjectMessage> objectMessages = new ArrayList<>();
     private long idGame;
-    List<Temporary> dead = new CopyOnWriteArrayList<>();
+    private List<Temporary> dead = new CopyOnWriteArrayList<>();
     private final Connection[] connections;
     private ConcurrentHashMap<Connection, Boolean> survived = new ConcurrentHashMap<>();
     private final long id = idGenerator.get();
-    private List<GameObject> gameField = new ArrayList<>();
-    //private HashMap <Point, GameObject> objects = new HashMap<>();
 
     public static final int PLAYERS_IN_GAME = 4;
 
@@ -49,39 +49,36 @@ public class GameSession implements Tickable, Runnable {
 
 
     public void initialField() {
-
+        List<Point> spawnPositions = new ArrayList<>();
         //adding walls and woods
-        for (int i = 0;i < 17;i++) {
-            for (int j = 0;j < 13;j++) {
-                Point point = new Point(GameField.GRID_SIZE * i, GameField.GRID_SIZE * j);
-                if (i == 1 && j == 1
-                        || i == 1 && j == 11
-                        || i == 15 && j == 1
-                        || i == 15 && j == 11
-                        || i == 1 && j == 2
-                        || i == 2 && j == 1
-                        || i == 14 && j == 1
-                        || i == 15 && j == 2
-                        || i == 1 && j == 10
-                        || i == 2 && j == 11
-                        || i == 14 && j == 11
-                        || i == 15 && j == 10)
+        for (int i = 0; i < GameField.field.length; i++) {
+            for (int j = 0; j < GameField.field[i].length; j++) {
+                Point point = new Point(i * GameField.GRID_SIZE, j * GameField.GRID_SIZE);
+                if (GameField.field[i][j] == 0) {
                     continue;
-                else if (i % 2 == 0 && j % 2 == 0
-                        || i == 0
-                        || j == 0
-                        || i == 16
-                        || j == 12) {
+                }
+                else if (GameField.field[i][j] == 1) {
                     gameObjects.add(new Wall(point));
                 }
-                else {
+                else if (GameField.field[i][j] == 2) {
                     gameObjects.add(new Wood(point));
+                }
+                else if (GameField.field[i][j] == 3) {
+                    spawnPositions.add(point);
+                }
+                else if (GameField.field[i][j] == 4) {
+                    gameObjects.add(new BonusSpeed(point));
+                }
+                else if (GameField.field[i][j] == 5) {
+                    gameObjects.add(new BonusBomb(point));
+                }
+                else if (GameField.field[i][j] == 6) {
+                    gameObjects.add(new BonusFire(point));
                 }
             }
         }
-
-        // adding pawns
-        for (int i = 0; i < connections.length; i++) {
+        //adding pawns
+        for (int i = 0; i < spawnPositions.size(); i++) {
             Pawn pawn = new Pawn(spawnPositions.get(i), this);
             connections[i].setGirl(pawn);
             log.info("set pawn : " + connections[i].getPawn());
@@ -90,20 +87,20 @@ public class GameSession implements Tickable, Runnable {
         }
     }
 
-    private List<Point> spawnPositions = new ArrayList<>(Arrays.asList(
-            new Point(GameField.GRID_SIZE, GameField.GRID_SIZE),
-            new Point(GameField.GRID_SIZE, GameField.GRID_SIZE * 11),
-            new Point(GameField.GRID_SIZE * 15, GameField.GRID_SIZE),
-            new Point(GameField.GRID_SIZE * 15, GameField.GRID_SIZE * 11)
-    ));
+
 
     public static int nextValue() {
         return counter.getAndIncrement();
     }
 
-    public List<GameObject> getGameObjects() {
-        return new ArrayList<>(gameObjects);
+    public CopyOnWriteArrayList<GameObject> getGameObjects() {
+        return new CopyOnWriteArrayList<>(gameObjects);
     }
+
+    public ConcurrentHashMap<Point, GameObject> getGameField() {
+        return gameField;
+    }
+
 
     @Override
     public void tick(long elapsed) {
@@ -112,6 +109,11 @@ public class GameSession implements Tickable, Runnable {
                 new ObjectMessage(x.getClass().getSimpleName(), x.getId(),
                         ((Positionable)x).getPosition())));
         gameObjects.removeAll(dead);
+        gameField.clear();
+        gameObjects.forEach(x -> {
+            ((Positionable)x).getPosition().getSmallValues();
+            gameField.put(((Positionable)x).getPosition().getSmallValues(), x);
+        });
         dead.clear();
 
         EndMessage endGameWin = new EndMessage(1);
@@ -132,22 +134,23 @@ public class GameSession implements Tickable, Runnable {
             Broker.getInstance().send(survived.keySet().iterator().next(), Topic.END_MATCH, endGameWin);
             survived.keySet().iterator().next().getSession().close();
         }
-        //Broker.getInstance().broadcast(Topic.REPLICA,  objectMessages);
 
+        //List<Point> changePos = new CopyOnWriteArrayList<>();
         for (GameObject gameObject : gameObjects) {
             if (gameObject instanceof Tickable) {
                 ((Tickable) gameObject).tick(elapsed);
             }
             if (gameObject instanceof Temporary && ((Temporary) gameObject).isDead()) {
                 dead.add((Temporary)gameObject);
+                //changePos.add(gameObject.getKey());
                 ((Positionable)gameObject).setPosition(new Point(500, 500));
             }
         }
+        //changePos.forEach(x -> gameObjects.put(x, ((Positionable)gameObjects.get(x)).setPosition(new Point(500, 500)));
         //gameObjects.removeAll(dead);
     }
 
     public void addGameObject(GameObject gameObject) {
-        //objects.put(((Positionable)gameObject).getPosition(), gameObject);
         gameObjects.add(gameObject);
     }
 

@@ -38,7 +38,7 @@ public class EventServer implements Runnable {
         server.setHandler(contexts);
 
         // Add a websocket to a specific path spec
-        ServletHolder holderEvents = new ServletHolder("ws-events", EventServlet.class);
+        //ServletHolder holderEvents = new ServletHolder("ws-events", EventServlet.class);
         //context.addServlet(holderEvents, "/");
 
         try {
@@ -91,10 +91,9 @@ public class EventServer implements Runnable {
         ContextHandler context = new ContextHandler();
         context.setContextPath("/gs/0");
         ResourceHandler handler = new ResourceHandler();
-        String eventRoot = EventServer.class.getResource("/static").toString();
-        String serverRoot = eventRoot.substring(0, eventRoot.length() - 35) + "frontend/src/main/webapp";
+        String eventRoot = EventServer.class.getResource("/static/frontend/src/main/webapp").toString();
         handler.setWelcomeFiles(new String[]{"index.html"});
-        handler.setResourceBase(serverRoot);
+        handler.setResourceBase(eventRoot);
         context.setHandler(handler);
         return context;
     }

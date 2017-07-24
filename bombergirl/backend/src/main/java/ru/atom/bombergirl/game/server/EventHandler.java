@@ -1,11 +1,12 @@
 package ru.atom.bombergirl.game.server;
 
+import com.google.common.net.HttpHeaders;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import ru.atom.bombergirl.mmserver.Connection;
-import ru.atom.bombergirl.mmserver.ThreadSafeQueue;
+import ru.atom.bombergirl.mmserver.ConnectionQueue;
 import ru.atom.bombergirl.communication.network.Broker;
 import ru.atom.bombergirl.communication.network.ConnectionPool;
 
@@ -15,11 +16,12 @@ public class EventHandler extends WebSocketAdapter {
     @Override
     public void onWebSocketConnect(Session sess) {
         super.onWebSocketConnect(sess);
-        Connection player = new Connection(sess);
+        String token = sess.getUpgradeRequest().getHeader(HttpHeaders.COOKIE).substring(14);
+        Connection player = new Connection(token, sess);
         ConnectionPool.getInstance().add(sess, player);
-        ThreadSafeQueue.getInstance().offer(player);
+        ConnectionQueue.getInstance().offer(player);
         log.info("add element : " + player.getPawn() + " into queue");
-        log.info("ThreadSafeQueue size is " + ThreadSafeQueue.getInstance().size());
+        log.info("ThreadSafeQueue size is " + ConnectionQueue.getInstance().size());
         System.out.println("Socket Connected: " + sess);
     }
 

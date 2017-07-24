@@ -16,12 +16,6 @@ import ru.atom.bombergirl.server.CrossBrowserFilter;
 
 public class MatchMakerServer {
     public static void main(String[] args) throws Exception {
-        /*new Thread(new Runnable() {
-            @Override
-            public void run() {
-                EventServer.main(args);
-            }
-        }).start();*/
         Database.setUp();
 
         ContextHandlerCollection contexts = new ContextHandlerCollection();

@@ -11,11 +11,12 @@ public class Connection {
     //private final String name;
     private final Session session;
     private Pawn pawn;
+    private String token;
     private static int counter = 0;
     private final int id = counter++;
 
-    public Connection(/*String name, */Session session) {
-        //this.name = name;
+    public Connection(String token, Session session) {
+        this.token = token;
         this.session = session;
     }
 
@@ -46,5 +47,9 @@ public class Connection {
         return "Connection{" +
                 ", id='" + id + '\'' +
                 '}';
+    }
+
+    public String getToken() {
+        return token;
     }
 }
