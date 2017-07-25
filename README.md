@@ -1,10 +1,3 @@
-# Java Technoatom
+# Bombergirl by course 'Java Technoatom'
 
-[![Build Status](https://travis-ci.org/rybalkinsd/atom.png?branch=master)](https://travis-ci.org/rybalkinsd/atom)
-[![Coverage Status](https://coveralls.io/repos/github/rybalkinsd/atom/badge.png?branch=master)](https://coveralls.io/github/rybalkinsd/atom?branch=master)
-
-[![](http://icons.iconarchive.com/icons/alecive/flatwoken/32/Apps-Telegram-icon.png) Join chat](https://t.me/joinchat/AAAAAEF63F9PvqE4JDzYdQ) - feel free to contact us
-
-
-Course repository.
-All course lectures/sources/tasks are available here.
+![1](https://camo.githubusercontent.com/72a409648201c050e75eb9a59d12126399e9d6e4/68747470733a2f2f6836766f61672e626e313330342e6c69766566696c6573746f72652e636f6d2f79346d4f677567766e4f6e4f68374731794e2d4c3773695947537654716472613579356777637156454e64496b504f6f45644f73666e5876434439566b41587730696757365367757653714f326b347949676276545a6d687555534d4c6c435477307962504167356a475632585a75466f6c307a4a5a364e4737384e424d47317a32453974466f766f456b6c545353714c45455f6e6a41526d79456437484f6f7544614c582d49735050734450474d30316f686c394f635853367135654e4b307a44544e445768614b3958534e34564a69467a3734735234413f77696474683d353833266865696768743d3534332663726f706d6f64653d6e6f6e65)
